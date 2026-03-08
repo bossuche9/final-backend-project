@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const app = express();
+const path = require("path");
 
 const connectDB = require("./db/connect");
 
@@ -31,6 +32,8 @@ const exerciseRouter = require("./routes/exercises");
 
 app.set("view engine", "ejs");
 app.use(require("body-parser").urlencoded({ extended: true }));
+
+app.use(express.static(path.join(__dirname, "public")));
 
 const url = process.env.MONGO_URI;
 
@@ -70,7 +73,18 @@ app.use(csrfMiddleware);
 passportInit();
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"], // allows /public/js/*.js, blocks inline scripts
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", "data:"],
+      },
+    },
+  }),
+);
 app.use(xssMiddleware);
 
 app.use(storeLocals);

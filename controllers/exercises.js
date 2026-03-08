@@ -1,9 +1,11 @@
 const Exercise = require("../models/Exercises");
 
 function parseSets(body) {
-  const weights = [].concat()(body["sets[weight][]"] || []);
-  const reps = [].concat()(body["sets[reps][]"] || []);
-  const completed = [].concat()(body["sets[isCompleted][]"] || []);
+  // extended:true parses sets[weight][] as body.sets.weight (nested object)
+  const setsData = body.sets || {};
+  const weights = [].concat(setsData.weight || []);
+  const reps = [].concat(setsData.reps || []);
+  const completed = [].concat(setsData.isCompleted || []);
 
   return weights.map((w, i) => ({
     setNumber: i + 1,
@@ -20,13 +22,20 @@ const getAllExercises = async (req, res) => {
 
 const createExercise = async (req, res) => {
   try {
-    const { exerciseName, bodyPart, personalBestStatus } = req.body;
+    const { exerciseName, bodyPart, personalBestStatus, day } = req.body;
+    console.log("BODY:", req.body); // add this temporarily
+    const sets = parseSets(req.body);
+    console.log("PARSED SETS:", sets); // and this
+
     await Exercise.create({
       exerciseName,
       bodyPart,
       personalBestStatus,
+      sets,
+      day: day || undefined,
       createdBy: req.user._id,
     });
+
     req.flash("info", "Exercise created successfully.");
     res.redirect("/exercises");
   } catch (e) {
@@ -55,12 +64,18 @@ const editExercise = async (req, res) => {
 
 const updateExercise = async (req, res) => {
   try {
-    const { exerciseName, bodyPart, personalBestStatus } = req.body;
-    // const sets = parseSets(req.body);
+    const { exerciseName, bodyPart, personalBestStatus, day } = req.body;
+    const sets = parseSets(req.body);
 
     const exercise = await Exercise.findOneAndUpdate(
       { _id: req.params.id, createdBy: req.user._id },
-      { exerciseName, bodyPart, personalBestStatus },
+      {
+        exerciseName,
+        bodyPart,
+        personalBestStatus,
+        sets,
+        day: day || undefined,
+      },
       { new: true, runValidators: true },
     );
     if (!exercise) {
