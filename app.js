@@ -11,28 +11,26 @@ const connectFlash = require("connect-flash");
 const passportInit = require("./passport/passportinit");
 
 const notFoundMiddleware = require("./middleware/not-found");
+const errorHandlerMiddleware = require("./middleware/error-handler");
 const storeLocals = require("./middleware/storeLocals");
+const auth = require("./middleware/auths");
 
 //security packages
 const helmet = require("helmet");
-const cors = require("cors");
-const xss = require("xss-clean");
+const xssMiddleware = require("./middleware/xss");
+const csrf = require("host-csrf");
 const rateLimiter = require("express-rate-limit");
+
+const cookieParser = require("cookie-parser");
+app.use(cookieParser(process.env.SESSION_SECRET));
+const csrfMiddleware = csrf.csrf();
 
 //routes
 const sessionRoutes = require("./routes/sessionRoutes");
+const exerciseRouter = require("./routes/exercises");
 
 app.set("view engine", "ejs");
 app.use(require("body-parser").urlencoded({ extended: true }));
-
-//error handler
-app.use((err, req, res, next) => {
-  res.status(500).send(err.message);
-  console.log(err);
-});
-
-//middleware
-app.use(notFoundMiddleware);
 
 const url = process.env.MONGO_URI;
 
@@ -49,7 +47,7 @@ const sessionParms = {
   resave: true,
   saveUninitialized: true,
   store: store,
-  cookie: { secure: false, sameSite: "stricit" },
+  cookie: { secure: false, sameSite: "strict" },
 };
 
 if (app.get("env") === "production") {
@@ -57,24 +55,36 @@ if (app.get("env") === "production") {
   sessionParms.cookie.secure = true; // serve secure cookies
 }
 
+app.use(
+  rateLimiter({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+  }),
+);
+
 app.use(session(sessionParms));
-app.use(connectFlash);
+app.use(connectFlash());
+
+app.use(csrfMiddleware);
 
 passportInit();
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(helmet());
-app.use(cors());
-app.use(xss());
+app.use(xssMiddleware);
 
 app.use(storeLocals);
 
+//home page route to index
 app.get("/", (req, res) => {
   res.render("index");
 });
 
 app.use("/sessions", sessionRoutes);
 app.use("/exercises", auth, exerciseRouter);
+
+app.use(notFoundMiddleware);
+app.use(errorHandlerMiddleware);
 
 const port = process.env.PORT || 3000;
 

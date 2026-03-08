@@ -1,0 +1,35 @@
+   <%- include('partials/head.ejs') %>
+   <%- include('partials/header.ejs') %>
+  <h2>Exercises List</h2>
+  <a href="/exercises/new"><button type="button">Add New Exercise</button></a>
+    <table id="exercises-table">
+      <tr id="exercises-table-header">
+        <th>Exercise Name</th>
+        <th>Body Part</th>
+        <th>Personal Best Status</th>
+        <th colspan="2"></th>
+      </tr>
+      <% if (exercises && exercises.length) { %>
+        <% exercises.forEach((exercise) => { %>
+          <tr>
+            <td><%= exercise.exerciseName %></td>
+            <td><%= exercise.bodyPart %></td>
+            <td><%= exercise.personalBestStatus %></td>
+            <td>
+              <a href="/exercises/edit/<%= exercise._id %>">
+                  <button type="button">edit</button>
+                </a>
+            </td>
+            <td>
+              <form method="POST" style="display: inline;" action="/exercises/delete/<%= exercise._id %>"  >
+                <button type="submit">delete</button>
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      <% } else { %>
+        <tr><td colspan="5"> No exercise yet, Add one</td></tr>
+      <% } %>
+    </table>
+  <%- include('partials/footer.ejs') %>

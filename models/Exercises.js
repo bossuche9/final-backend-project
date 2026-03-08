@@ -1,4 +1,27 @@
 const mongoose = require("mongoose");
+
+const SetSchema = new mongoose.Schema(
+  {
+    setNumber: {
+      type: Number,
+      //required:
+    },
+    weight: {
+      type: Number,
+      default: 0,
+    },
+    reps: {
+      type: Number,
+      default: 0,
+    },
+    isCompleted: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  { _id: false },
+);
+
 const ExerciseSchema = new mongoose.Schema(
   {
     exerciseName: {
@@ -27,6 +50,14 @@ const ExerciseSchema = new mongoose.Schema(
       type: mongoose.Types.ObjectId,
       ref: "User",
       required: [true, "Please provide user"],
+    },
+    sets: {
+      type: [SetSchema],
+      default: [],
+    },
+    day: {
+      type: Date,
+      default: Date.now,
     },
   },
   { timestamps: true },

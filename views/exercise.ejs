@@ -1,0 +1,32 @@
+<%- include('partials/head.ejs') %>
+<%- include('partials/header.ejs') %>
+<h2><%= exercise ? 'Edit Exercise' : 'New Exercise' %></h2>
+
+<% if(errors && errors.length) { %>
+    <% errors.forEach(err => { %>
+    <p style="color: red;"><%=err %></p>
+   <% }) %>
+<% } %>
+
+<form method="POST" action="<%= exercise ? '/exercises/update/' + exercise._id : '/exercises/' %>">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
+
+    <label>Exercise Name:</label><br/>
+    <input type="text" name="exerciseName" value="<%= exercise ? exercise.exerciseName : '' %>" required /><br/><br/>
+
+    <label>Body Part:</label><br/>
+    <input type="text" name="bodyPart" value="<%= exercise ? exercise.bodyPart : '' %>" required /><br/><br/>
+
+    <label>Personal Best Status:</label><br/>
+    <select name="personalBestStatus">
+      <% ['New personal record', 'No personal record', 'Bad sessions regressed'].forEach(opt => { %>
+        <option value="<%= opt %>" <%= exercise && exercise.personalBestStatus === opt ? 'selected' : '' %>>
+          <%= opt %>
+        </option>
+      <% }) %>
+    </select><br/><br/>
+    
+    <button type="submit"><%= exercise ? 'Update' : 'Create' %></button>
+    <a href="/exercises"><button type="button">Cancel</button></a>
+</form>
+<%- include('partials/footer.ejs') %>

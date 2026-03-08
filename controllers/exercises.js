@@ -1,5 +1,18 @@
 const Exercise = require("../models/Exercises");
 
+function parseSets(body) {
+  const weights = [].concat()(body["sets[weight][]"] || []);
+  const reps = [].concat()(body["sets[reps][]"] || []);
+  const completed = [].concat()(body["sets[isCompleted][]"] || []);
+
+  return weights.map((w, i) => ({
+    setNumber: i + 1,
+    weight: parseFloat(w) || 0,
+    reps: parseInt(reps[i]) || 0,
+    isCompleted: completed.includes(String(i)),
+  }));
+}
+
 const getAllExercises = async (req, res) => {
   const exercises = await Exercise.find({ createdBy: req.user._id });
   res.render("exercises", { exercises });
@@ -43,6 +56,8 @@ const editExercise = async (req, res) => {
 const updateExercise = async (req, res) => {
   try {
     const { exerciseName, bodyPart, personalBestStatus } = req.body;
+    // const sets = parseSets(req.body);
+
     const exercise = await Exercise.findOneAndUpdate(
       { _id: req.params.id, createdBy: req.user._id },
       { exerciseName, bodyPart, personalBestStatus },

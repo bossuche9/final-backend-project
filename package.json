@@ -23,8 +23,6 @@
     "connect-flash": "^0.1.1",
     "connect-mongodb-session": "^5.0.0",
     "cookie-parser": "^1.4.7",
-    "cors": "^2.8.6",
-    "csurf": "^1.11.0",
     "dotenv": "^17.3.1",
     "ejs": "^4.0.1",
     "express": "^5.2.1",
@@ -39,7 +37,6 @@
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
     "ratelimiter": "^3.4.1",
-    "xss": "^1.0.15",
-    "xss-clean": "^0.1.4"
+    "xss": "^1.0.15"
   }
 }
