@@ -16,8 +16,18 @@ function parseSets(body) {
 }
 
 const getAllExercises = async (req, res) => {
-  const exercises = await Exercise.find({ createdBy: req.user._id });
-  res.render("exercises", { exercises });
+  const { sort, order } = req.query;
+
+  const validSorts = { name: "exerciseName", body: "bodyPart" };
+  const sortField = validSorts[sort] || null;
+  const sortOrder = order === "desc" ? -1 : 1;
+
+  const sortQuery = sortField ? { [sortField]: sortOrder } : {};
+
+  const exercises = await Exercise.find({ createdBy: req.user._id }).sort(
+    sortQuery,
+  );
+  res.render("exercises", { exercises, sort, order });
 };
 
 const createExercise = async (req, res) => {

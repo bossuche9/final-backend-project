@@ -3,6 +3,22 @@
 <h2>Exercises List</h2>
 <a href="/exercises/new"><button type="button">Add New Exercise</button></a>
 
+<div style="margin: 10px 0;">
+  <label><strong>Sort by:</strong></label>
+
+   <a href="/exercises?sort=name&order=<%= (sort === 'name' && order === 'asc') ? 'desc' : 'asc' %>">
+    <button type="button">
+      Exercise Name <%= sort === 'name' ? (order === 'asc' ? '↑' : '↓') : '↕' %>
+    </button>
+  </a>
+
+  <a href="/exercises?sort=body&order=<%= (sort === 'body' && order === 'asc') ? 'desc' : 'asc' %>">
+    <button type="button">
+      Body Part <%= sort === 'body' ? (order === 'asc' ? '↑' : '↓') : '↕' %>
+    </button>
+  </a>
+</div>
+
 <table id="exercises-table">
   <thead>
     <tr>
