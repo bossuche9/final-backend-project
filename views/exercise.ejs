@@ -1,0 +1,65 @@
+<%- include('partials/head.ejs') %>
+<%- include('partials/header.ejs') %>
+<h2><%= exercise ? 'Edit Exercise' : 'New Exercise' %></h2>
+
+<% if(errors && errors.length) { %>
+  <% errors.forEach(err => { %>
+    <p style="color: red;"><%= err %></p>
+  <% }) %>
+<% } %>
+
+<form method="POST" action="<%= exercise ? '/exercises/update/' + exercise._id : '/exercises/' %>">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
+
+  <label>Exercise Name:</label><br/>
+  <input type="text" name="exerciseName" value="<%= exercise ? exercise.exerciseName : '' %>" required /><br/><br/>
+
+  <label>Body Part:</label><br/>
+  <input type="text" name="bodyPart" value="<%= exercise ? exercise.bodyPart : '' %>" required /><br/><br/>
+
+  <label>Personal Best Status:</label><br/>
+  <select name="personalBestStatus">
+    <% ['New personal record', 'No personal record', 'Bad sessions regressed'].forEach(opt => { %>
+      <option value="<%= opt %>" <%= exercise && exercise.personalBestStatus === opt ? 'selected' : '' %>>
+        <%= opt %>
+      </option>
+    <% }) %>
+  </select><br/><br/>
+
+  <h3>Sets</h3>
+  <table id="sets-table">
+    <thead>
+      <tr>
+        <th>Set #</th>
+        <th>Weight (kg/lbs)</th>
+        <th>Reps</th>
+        <th>Done ✓</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="sets-body">
+      <%
+        const existingSets = (exercise && exercise.sets && exercise.sets.length)
+          ? exercise.sets
+          : [{ setNumber: 1, weight: '', reps: '', isCompleted: false }];
+      %>
+      <% existingSets.forEach((s, i) => { %>
+        <tr class="set-row">
+          <td><%= i + 1 %></td>
+          <td><input type="number" name="sets[weight][]" value="<%= s.weight %>" min="0" step="0.5" placeholder="0"/></td>
+          <td><input type="number" name="sets[reps][]" value="<%= s.reps %>" min="0" step="1" placeholder="0"/></td>
+          <td><input type="checkbox" name="sets[isCompleted][]" value="<%= i %>" <%= s.isCompleted ? 'checked' : '' %>/></td>
+          <td><button type="button" data-action="remove-set">&#x2715;</button></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+
+  <button type="button" id="add-set-btn">+ Add Set</button><br/><br/>
+
+  <button type="submit"><%= exercise ? 'Update' : 'Create' %></button>
+  <a href="/exercises"><button type="button">Cancel</button></a>
+</form>
+<script src="/js/exercise.js"></script>
+
+<%- include('partials/footer.ejs') %>

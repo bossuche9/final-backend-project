@@ -1,0 +1,42 @@
+{
+  "name": "final-backend-project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "node app.js",
+    "start": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bossuche9/final-backend-project.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bossuche9/final-backend-project/issues"
+  },
+  "homepage": "https://github.com/bossuche9/final-backend-project#readme",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "connect-flash": "^0.1.1",
+    "connect-mongodb-session": "^5.0.0",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.3.1",
+    "ejs": "^4.0.1",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.2.1",
+    "express-session": "^1.19.0",
+    "helmet": "^8.1.0",
+    "host-csrf": "^2.0.0",
+    "http-status-codes": "^2.3.0",
+    "mongoose": "^9.2.4",
+    "moongoose": "^0.0.5",
+    "nodemon": "^3.1.14",
+    "passport": "^0.7.0",
+    "passport-local": "^1.0.0",
+    "ratelimiter": "^3.4.1",
+    "xss": "^1.0.15"
+  }
+}

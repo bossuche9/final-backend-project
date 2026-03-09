@@ -1,0 +1,72 @@
+<%- include('partials/head.ejs') %>
+<%- include('partials/header.ejs') %>
+<h2>Exercises List</h2>
+<a href="/exercises/new"><button type="button">Add New Exercise</button></a>
+
+<div style="margin: 10px 0;">
+  <label><strong>Sort by:</strong></label>
+
+   <a href="/exercises?sort=name&order=<%= (sort === 'name' && order === 'asc') ? 'desc' : 'asc' %>">
+    <button type="button">
+      Exercise Name <%= sort === 'name' ? (order === 'asc' ? '↑' : '↓') : '↕' %>
+    </button>
+  </a>
+
+  <a href="/exercises?sort=body&order=<%= (sort === 'body' && order === 'asc') ? 'desc' : 'asc' %>">
+    <button type="button">
+      Body Part <%= sort === 'body' ? (order === 'asc' ? '↑' : '↓') : '↕' %>
+    </button>
+  </a>
+</div>
+
+<table id="exercises-table">
+  <thead>
+    <tr>
+      <th>Exercise Name</th>
+      <th>Body Part</th>
+      <th>Personal Best Status</th>
+      <th>Sets</th>
+      <th colspan="2"></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if (exercises && exercises.length) { %>
+      <% exercises.forEach((exercise) => { %>
+        <tr>
+          <td><%= exercise.exerciseName %></td>
+          <td><%= exercise.bodyPart %></td>
+          <td><%= exercise.personalBestStatus %></td>
+          <td>
+            <% if (exercise.sets && exercise.sets.length) { %>
+              <% exercise.sets.forEach(s => { %>
+                <div>
+                  Set <%= s.setNumber %>:
+                  <%= s.reps %> reps @
+                  <%= s.weight %> lbs/kg
+                  <%= s.isCompleted ? '✅' : '⬜' %>
+                </div>
+              <% }) %>
+            <% } else { %>
+              —
+            <% } %>
+          </td>
+          <td>
+            <a href="/exercises/edit/<%= exercise._id %>">
+              <button type="button">Edit</button>
+            </a>
+          </td>
+          <td>
+            <form method="POST" action="/exercises/delete/<%= exercise._id %>">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
+              <button type="submit">Delete</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+    <% } else { %>
+      <tr><td colspan="6">No exercises yet, add one!</td></tr>
+    <% } %>
+  </tbody>
+</table>
+
+<%- include('partials/footer.ejs') %>
