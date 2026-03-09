@@ -23,10 +23,9 @@ const getAllExercises = async (req, res) => {
 const createExercise = async (req, res) => {
   try {
     const { exerciseName, bodyPart, personalBestStatus, day } = req.body;
-    console.log("BODY:", req.body); // add this temporarily
+    console.log("BODY:", req.body);
     const sets = parseSets(req.body);
-    console.log("PARSED SETS:", sets); // and this
-
+    console.log("PARSED SETS:", sets);
     await Exercise.create({
       exerciseName,
       bodyPart,
