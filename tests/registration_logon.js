@@ -24,7 +24,6 @@ describe("tests for registration and logon", function () {
     this.csrfToken = csrfToken[1];
 
     const cookies = res.headers["set-cookie"];
-    console.log("Cookies:", res.headers["set-cookie"]);
     this.csrfCookie = cookies.find((c) => c.startsWith("__Host-csrfToken"));
     expect(this.csrfCookie).to.not.be.undefined;
   });
@@ -92,5 +91,20 @@ describe("tests for registration and logon", function () {
     expect(res).to.have.status(200);
     expect(res).to.have.property("text");
     expect(res.text).to.include(this.user.name);
+  });
+
+  it("should log the user off", async function () {
+    const { expect, request } = await get_chai();
+
+    const res = await request(app)
+      .post("/sessions/logoff")
+      .set("Cookie", this.csrfCookie + ";" + this.sessionCookie)
+      .type("form")
+      .send({
+        _csrf: this.csrfToken,
+      });
+
+    expect(res).to.have.status(200);
+    expect(res.text).to.include("link to logon");
   });
 });
