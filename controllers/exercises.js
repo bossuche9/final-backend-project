@@ -33,9 +33,8 @@ const getAllExercises = async (req, res) => {
 const createExercise = async (req, res) => {
   try {
     const { exerciseName, bodyPart, personalBestStatus, day } = req.body;
-    console.log("BODY:", req.body);
     const sets = parseSets(req.body);
-    console.log("PARSED SETS:", sets);
+
     await Exercise.create({
       exerciseName,
       bodyPart,
@@ -97,18 +96,26 @@ const updateExercise = async (req, res) => {
     const errors = e.errors
       ? Object.values(e.errors).map((err) => err.message)
       : [e.message];
-    const exercise = await Exercise.findOne({ _id: req.params.id });
+
+    const exercise = await Exercise.findOne({
+      _id: req.params.id,
+      createdBy: req.user._id,
+    });
     res.render("exercise", { exercise, errors });
   }
 };
 
 const deleteExercise = async (req, res) => {
-  await Exercise.findOneAndDelete({
+  const exercise = await Exercise.findOneAndDelete({
     _id: req.params.id,
     createdBy: req.user._id,
   });
-  req.flash("info", "Exercise deleted.");
-  res.redirect("/exercises");
+  if (!exercise) {
+    req.flash("error", "Exercise not found.");
+  } else {
+    req.flash("info", "Exercise deleted.");
+    res.redirect("/exercises");
+  }
 };
 
 module.exports = {

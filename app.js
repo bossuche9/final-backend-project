@@ -3,7 +3,7 @@ const express = require("express");
 const app = express();
 const path = require("path");
 
-const connectDB = require("./db/connect");
+//const connectDB = require("./db/connect");
 
 const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
@@ -24,6 +24,7 @@ const rateLimiter = require("express-rate-limit");
 
 const cookieParser = require("cookie-parser");
 app.use(cookieParser(process.env.SESSION_SECRET));
+
 const csrfMiddleware = csrf.csrf();
 
 //routes
@@ -31,48 +32,8 @@ const sessionRoutes = require("./routes/sessionRoutes");
 const exerciseRouter = require("./routes/exercises");
 
 app.set("view engine", "ejs");
-app.use(require("body-parser").urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }));
 
-app.use(express.static(path.join(__dirname, "public")));
-
-const url = process.env.MONGO_URI;
-
-const store = new MongoDBStore({
-  uri: url,
-  collection: "mySessions",
-});
-store.on("error", function (error) {
-  console.log(error);
-});
-
-const sessionParms = {
-  secret: process.env.SESSION_SECRET,
-  resave: true,
-  saveUninitialized: true,
-  store: store,
-  cookie: { secure: false, sameSite: "strict" },
-};
-
-if (app.get("env") === "production") {
-  app.set("trust proxy", 1); // trust first proxy
-  sessionParms.cookie.secure = true; // serve secure cookies
-}
-
-app.use(
-  rateLimiter({
-    windowMs: 15 * 60 * 1000,
-    max: 100,
-  }),
-);
-
-app.use(session(sessionParms));
-app.use(connectFlash());
-
-app.use(csrfMiddleware);
-
-passportInit();
-app.use(passport.initialize());
-app.use(passport.session());
 app.use(
   helmet({
     contentSecurityPolicy: {
@@ -85,9 +46,62 @@ app.use(
     },
   }),
 );
-app.use(xssMiddleware);
 
+app.use(
+  rateLimiter({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+  }),
+);
+
+app.use(express.static(path.join(__dirname, "public")));
+
+let mongoURL = process.env.MONGO_URI;
+if (process.env.NODE_ENV == "test") {
+  mongoURL = process.env.MONGO_URI_TEST;
+}
+
+const store = new MongoDBStore({
+  uri: mongoURL,
+  collection: "mySessions",
+});
+store.on("error", function (error) {
+  console.log(error);
+});
+
+const sessionParms = {
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: true,
+  store: store,
+  cookie: { secure: false, sameSite: "strict" },
+};
+
+if (app.get("env") === "production") {
+  app.set("trust proxy", 1); // trust first proxy
+  sessionParms.cookie.secure = true; // serve secure cookies
+}
+
+app.use(session(sessionParms));
+app.use(connectFlash());
+
+app.use(csrfMiddleware);
+
+passportInit();
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use(xssMiddleware);
 app.use(storeLocals);
+
+app.use((req, res, next) => {
+  if (req.path == "/multiply") {
+    res.set("Content-Type", "application/json");
+  } else {
+    res.set("Content-Type", "text/html");
+  }
+  next();
+});
 
 //home page route to index
 app.get("/", (req, res) => {
@@ -97,6 +111,16 @@ app.get("/", (req, res) => {
 app.use("/sessions", sessionRoutes);
 app.use("/exercises", auth, exerciseRouter);
 
+app.get("/multiply", (req, res) => {
+  const result = req.query.first * req.query.second;
+  if (result.isNaN) {
+    result = "NaN";
+  } else if (result == null) {
+    result = "null";
+  }
+  res.json({ result: result });
+});
+
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
 
@@ -104,11 +128,15 @@ const port = process.env.PORT || 3000;
 
 const start = async () => {
   try {
-    await connectDB(process.env.MONGO_URI);
-    app.listen(port, console.log(`Server is listening port ${port}...`));
+    await require("./db/connect")(mongoURL);
+    return app.listen(port, () =>
+      console.log(`Server is listening on port ${port}...`),
+    );
   } catch (error) {
     console.log(error);
   }
 };
 
 start();
+
+module.exports = { app };

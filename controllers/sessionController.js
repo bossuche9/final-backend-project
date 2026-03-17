@@ -7,8 +7,8 @@ const registerShow = (req, res) => {
 
 const registerDo = async (req, res, next) => {
   if (req.body.password != req.body.password1) {
-    req.flash("errors", "The passwords entered do not match.");
-    return res.render("register", { errors: req.flash("errors") });
+    req.flash("error", "The passwords entered do not match.");
+    return res.render("register", { errors: req.flash("error") });
   }
   try {
     await User.create(req.body);
@@ -16,11 +16,11 @@ const registerDo = async (req, res, next) => {
     if (e.constructor.name === "ValidationError") {
       parseVErr(e, req);
     } else if (e.name === "MongoServerError" && e.code === 11000) {
-      req.flash("errors", "That email address is already registered.");
+      req.flash("error", "That email address is already registered.");
     } else {
       return next(e);
     }
-    return res.render("register", { errors: req.flash("errors") });
+    return res.render("register", { errors: req.flash("error") });
   }
   res.redirect("/");
 };
