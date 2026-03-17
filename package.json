@@ -4,8 +4,9 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "node app.js",
-    "start": "nodemon app.js"
+    "test": "NODE_ENV=test mocha tests/*.js --timeout 5000 --exit",
+    "start": "node app.js",
+    "dev": "nodemon app.js"
   },
   "repository": {
     "type": "git",
@@ -32,11 +33,18 @@
     "host-csrf": "^2.0.0",
     "http-status-codes": "^2.3.0",
     "mongoose": "^9.2.4",
-    "moongoose": "^0.0.5",
-    "nodemon": "^3.1.14",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
     "ratelimiter": "^3.4.1",
     "xss": "^1.0.15"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^8.4.1",
+    "chai": "^4.5.0",
+    "chai-http": "^4.4.0",
+    "factory-bot": "^5.2.0",
+    "mocha": "^11.7.5",
+    "nodemon": "^3.1.14",
+    "puppeteer": "^24.39.1"
   }
 }
